@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Agent {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  isLeader  Boolean   @default(false)
+  active    Boolean   @default(true)
+  kpis      AgentKpi[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model CommissionConfig {
+  id               Int      @id @default(autoincrement())
+  // Single “current” config for now; if you want multiple periods later, add a Period model and link.
+  targetNd         Float
+  workingDays      Int
+
+  bmNetDeposit     Float
+  bmFtdCount       Int
+  bmFtdAmount      Float
+  bmNetRedeposit   Float
+  bmRedepClients   Int
+  bmCallsPerDay    Int
+
+  applyBase        String   // 'netDeposit' | 'netRedeposit' | 'composite'
+  bandsYour        String
+  bandsOpt         String
+  compositeAnchor  Float
+  compositeWeights String   // "20,20,20,20,20"
+  leaderBonusCap   Float
+
+  daysElapsed      Int
+  daysInMonth      Int
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model AgentKpi {
+  id               Int      @id @default(autoincrement())
+  agentId          Int
+  agent            Agent    @relation(fields: [agentId], references: [id])
+
+  netDeposit       Float    @default(0)
+  ftdCount         Int      @default(0)
+  netRedeposit     Float    @default(0)
+  ftdAmount        Float    @default(0)
+  redepositClients Int      @default(0)
+  callsMonth       Int      @default(0)
+  callsAvg         Float    @default(0)
+  mgrBonus         Float    @default(0)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model AuditNote {
+  id        Int      @id @default(autoincrement())
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
